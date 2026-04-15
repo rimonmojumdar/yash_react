@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VidSnap Pro - Video Downloader Without Watermark</title>
+  <meta name="description" content="TikTok, Instagram, Facebook, YouTube থেকে watermark-free HD ভিডিও ডাউনলোড করুন বিনামূল্যে।" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07070f;
+      --card: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --cyan: #06b6d4;
+      --text: #f1f0ff;
+      --muted: #6b6b8a;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    
+    .bg-anim {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(139,92,246,0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse 60% 50% at 90% 80%, rgba(236,72,153,0.12) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 50% at 10% 80%, rgba(6,182,212,0.10) 0%, transparent 70%),
+                  #07070f;
+    }
+
+    .blob {
+      position: fixed; border-radius: 50%; filter: blur(60px);
+      pointer-events: none; opacity: 0.18; animation: floatBlob 8s ease-in-out infinite;
+    }
+    .blob1 { width:400px; height:400px; background:var(--purple); top:-100px; left:-100px; animation-delay:0s; }
+    .blob2 { width:300px; height:300px; background:var(--pink); bottom:-80px; right:-80px; animation-delay:3s; }
+    .blob3 { width:250px; height:250px; background:var(--cyan); top:40%; left:60%; animation-delay:5s; }
+
+    @keyframes floatBlob {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(20px,-20px) scale(1.05); }
+    }
+
+    
+    .wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+   
+    .ad-banner {
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed rgba(139,92,246,0.2);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .ad-inner { height: 60px; display:flex; align-items:center; justify-content:center; font-size:13px; }
+
+   
+    header { padding: 20px 0 10px; }
+    .header-inner { display:flex; align-items:center; justify-content:space-between; }
+    .logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .logo-icon {
+      width:40px; height:40px; border-radius:12px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 0 20px rgba(139,92,246,0.4);
+    }
+    .logo-icon svg { width:20px; height:20px; fill:white; }
+    .logo-text { font-size:22px; font-weight:900; background:linear-gradient(135deg,var(--purple),var(--pink),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    nav { display:flex; gap:24px; }
+    nav a { color:var(--muted); text-decoration:none; font-size:14px; transition:color .2s; }
+    nav a:hover { color:var(--text); }
+
+    
+    .hero { text-align:center; padding: 60px 0 40px; }
+    .badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.25);
+      border-radius:999px; padding:6px 16px; font-size:12px; color:#a78bfa;
+      font-weight:600; margin-bottom:28px;
+    }
+    .badge svg { width:14px; height:14px; fill:currentColor; }
+    h1 { font-size: clamp(36px, 7vw, 68px); font-weight:900; line-height:1.1; margin-bottom:20px; }
+    .grad { background:linear-gradient(135deg,var(--purple),var(--pink),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .subtitle { color:var(--muted); font-size:clamp(15px,2vw,18px); line-height:1.7; max-width:580px; margin:0 auto 48px; }
+
+    
+    .input-wrap {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 18px;
+      padding: 8px;
+      display:flex; gap:8px;
+      max-width:680px; margin:0 auto;
+      box-shadow: 0 0 40px rgba(139,92,246,0.15);
+    }
+    .url-input {
+      flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+      border-radius:12px; padding:14px 16px 14px 46px; font-size:15px; color:var(--text);
+      outline:none; font-family:inherit; transition:border-color .3s, box-shadow .3s;
+    }
+    .url-input::placeholder { color:var(--muted); }
+    .url-input:focus { border-color:rgba(139,92,246,0.5); box-shadow:0 0 20px rgba(139,92,246,0.2); }
+    .input-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); }
+    .input-icon svg { width:18px; height:18px; stroke:currentColor; fill:none; }
+    .input-field { position:relative; flex:1; }
+    .btn-dl {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color:white; border:none; border-radius:12px;
+      padding:14px 28px; font-size:15px; font-weight:700;
+      cursor:pointer; display:flex; align-items:center; gap:8px;
+      white-space:nowrap; transition:all .3s; font-family:inherit;
+      min-width:130px; justify-content:center;
+    }
+    .btn-dl:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(139,92,246,0.5); }
+    .btn-dl:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+
+    
+    .error-box {
+      max-width:680px; margin:12px auto 0;
+      background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25);
+      border-radius:10px; padding:12px 16px; color:#f87171; font-size:14px;
+      display:none;
+    }
+
+    
+    .result-section { padding: 0 0 40px; display:none; }
+    .result-card {
+      background: var(--card); border:1px solid rgba(139,92,246,0.2);
+      border-radius:20px; overflow:hidden;
+      box-shadow:0 0 50px rgba(139,92,246,0.15);
+    }
+    .platform-tag {
+      display:inline-block; padding:4px 12px; border-radius:999px;
+      font-size:12px; font-weight:700; color:white; margin:20px 20px 0;
+    }
+    .tag-tiktok { background:#010101; border:1px solid #333; }
+    .tag-instagram { background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045); }
+    .tag-facebook { background:#1877f2; }
+    .tag-youtube { background:#ff0000; }
+    .tag-twitter { background:#1da1f2; }
+
+    .result-inner { display:flex; gap:24px; padding:16px 20px 24px; flex-wrap:wrap; }
+    .thumb-wrap { width:180px; flex-shrink:0; }
+    .thumb-wrap img { width:100%; border-radius:12px; object-fit:cover; aspect-ratio:16/9; background:#111; display:block; }
+    .result-info { flex:1; min-width:220px; }
+    .result-title { font-size:17px; font-weight:700; margin-bottom:4px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .result-author { color:var(--muted); font-size:13px; margin-bottom:20px; }
+    .quality-label { font-size:11px; text-transform:uppercase; letter-spacing:2px; color:var(--muted); font-weight:600; margin-bottom:10px; }
+    .quality-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .q-btn {
+      border:none; border-radius:12px; padding:12px 14px;
+      font-size:13px; font-weight:700; color:white; cursor:pointer;
+      display:flex; align-items:center; justify-content:space-between;
+      transition:all .25s; font-family:inherit;
+    }
+    .q-btn:hover { transform:translateY(-2px); opacity:.92; }
+    .q-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    .q-1080 { background:linear-gradient(135deg,#7c3aed,#a855f7); }
+    .q-720  { background:linear-gradient(135deg,#2563eb,#06b6d4); }
+    .q-480  { background:linear-gradient(135deg,#059669,#10b981); }
+    .q-mp3  { background:linear-gradient(135deg,#db2777,#f43f5e); }
+    .q-btn-left { display:flex; align-items:center; gap:8px; }
+    .q-btn-left svg { width:16px; height:16px; stroke:currentColor; fill:none; }
+    .q-size { font-size:11px; opacity:.7; font-weight:500; }
+
+    
+    .spinner {
+      width:20px; height:20px; border:2.5px solid rgba(255,255,255,.2);
+      border-top-color:white; border-radius:50%; animation:spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+   
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:30px 0; }
+    .stat {
+      background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.04));
+      border:1px solid rgba(139,92,246,0.15);
+      border-radius:16px; padding:20px; text-align:center;
+    }
+    .stat-val { font-size:28px; font-weight:900; background:linear-gradient(135deg,var(--purple),var(--pink)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .stat-lbl { font-size:12px; color:var(--muted); margin-top:4px; }
+
+    
+    .section-title { text-align:center; font-size:clamp(26px,4vw,38px); font-weight:900; margin-bottom:10px; }
+    .section-sub { text-align:center; color:var(--muted); margin-bottom:40px; font-size:15px; }
+    .platforms { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .platform-card {
+      background:var(--card); border:1px solid var(--border); border-radius:18px;
+      padding:28px 16px; text-align:center; transition:all .3s; cursor:default;
+    }
+    .platform-card:hover { border-color:rgba(139,92,246,0.3); transform:translateY(-4px); }
+    .platform-card .p-icon {
+      width:60px; height:60px; border-radius:16px; margin:0 auto 14px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .platform-card .p-icon svg { width:30px; height:30px; fill:white; }
+    .platform-card .p-name { font-weight:700; font-size:14px; margin-bottom:4px; }
+    .platform-card .p-tag { font-size:12px; color:var(--muted); }
+
+    
+    .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .step-card {
+      background:var(--card); border:1px solid var(--border); border-radius:18px;
+      padding:28px; text-align:center; position:relative; overflow:hidden; transition:all .3s;
+    }
+    .step-card:hover { transform:translateY(-4px); border-color:rgba(139,92,246,0.3); }
+    .step-num { position:absolute; top:14px; right:18px; font-size:52px; font-weight:900; color:rgba(255,255,255,0.04); }
+    .step-icon {
+      width:56px; height:56px; border-radius:16px; margin:0 auto 16px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .step-icon svg { width:28px; height:28px; stroke:white; fill:none; }
+    .step-title { font-size:17px; font-weight:700; margin-bottom:8px; }
+    .step-desc { color:var(--muted); font-size:14px; line-height:1.6; }
+
+    
+    .features-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:40px; }
+    .features-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:30px; }
+    .feature-item {
+      display:flex; align-items:center; gap:12px; padding:12px;
+      border-radius:12px; transition:background .2s;
+    }
+    .feature-item:hover { background:rgba(255,255,255,0.04); }
+    .feature-icon {
+      width:38px; height:38px; border-radius:10px; flex-shrink:0;
+      background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.2);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .feature-icon svg { width:18px; height:18px; stroke:#a78bfa; fill:none; }
+    .feature-text { font-weight:600; font-size:14px; }
+
+    
+    .faq-wrap { border-radius:18px; overflow:hidden; border:1px solid var(--border); background:var(--card); }
+    .faq-item { border-bottom:1px solid rgba(255,255,255,0.05); }
+    .faq-item:last-child { border-bottom:none; }
+    .faq-q {
+      width:100%; background:none; border:none; color:var(--text);
+      padding:20px 24px; font-size:15px; font-weight:600; text-align:left;
+      cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+      font-family:inherit; transition:background .2s;
+    }
+    .faq-q:hover { background:rgba(255,255,255,0.03); }
+    .faq-q svg { width:18px; height:18px; stroke:var(--muted); fill:none; flex-shrink:0; transition:transform .3s; }
+    .faq-q.open svg { transform:rotate(180deg); }
+    .faq-a { padding:0 24px 20px; color:var(--muted); font-size:14px; line-height:1.7; display:none; }
+    .faq-a.open { display:block; }
+
+    
+    footer { border-top:1px solid rgba(255,255,255,0.05); padding:40px 0; text-align:center; }
+    .footer-logo { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px; }
+    .footer-desc { color:var(--muted); font-size:14px; margin-bottom:8px; }
+    .footer-copy { color:rgba(107,107,138,.5); font-size:12px; }
+
+    
+    .section { padding: 60px 0; }
+
+    
+    @media (max-width:700px) {
+      nav { display:none; }
+      .platforms { grid-template-columns:1fr 1fr; }
+      .steps { grid-template-columns:1fr; }
+      .stats { grid-template-columns:1fr 1fr; }
+      .features-grid { grid-template-columns:1fr; }
+      .quality-grid { grid-template-columns:1fr; }
+      .thumb-wrap { width:100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-anim"></div>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+
+<div class="wrap" style="padding-top:12px;">
+  <div class="ad-banner">
+    <div style="font-size:10px;letter-spacing:2px;margin-bottom:4px;">Advertisement</div>
+    <div class="ad-inner">[Ad Space — 728×90 Leaderboard]</div>
+  </div>
+</div>
+
+
+<header>
+  <div class="wrap">
+    <div class="header-inner">
+      <a href="/" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="logo-text">VidSnap Pro</span>
+      </a>
+      <nav>
+        <a href="#how">How it Works</a>
+        <a href="#platforms">Platforms</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+
+<section class="hero">
+  <div class="wrap">
+    <div class="badge">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Watermark Free &bull; HD Quality &bull; 100% Free
+    </div>
+    <h1>
+      Download Videos<br>
+      <span class="grad">Without Watermark</span>
+    </h1>
+    <p class="subtitle">
+      TikTok, Instagram, Facebook, YouTube থেকে HD ভিডিও ডাউনলোড করুন মাত্র কয়েক সেকেন্ডে।
+      কোনো watermark নেই, কোনো registration নেই।
+    </p>
+
+    <div class="input-wrap">
+      <div class="input-field">
+        <span class="input-icon">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </span>
+        <input
+          type="url" id="videoUrl" class="url-input"
+          placeholder="TikTok / Instagram / Facebook / YouTube URL paste করুন..."
+          onkeydown="if(event.key==='Enter') fetchInfo()"
+        />
+      </div>
+      <button class="btn-dl" id="fetchBtn" onclick="fetchInfo()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download
+      </button>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+  </div>
+</section>
+
+
+<div class="wrap">
+  <div class="result-section" id="resultSection">
+    <div class="result-card" id="resultCard">
+      
+    </div>
+
+    
+    <div class="ad-banner" style="margin-top:16px;">
+      <div style="font-size:10px;letter-spacing:2px;margin-bottom:4px;">Advertisement</div>
+      <div class="ad-inner">[Ad Space — 728×90 Mid Content]</div>
+    </div>
+  </div>
+</div>
+
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="stat-val">50M+</div><div class="stat-lbl">Videos Downloaded</div></div>
+    <div class="stat"><div class="stat-val">4</div><div class="stat-lbl">Platforms</div></div>
+    <div class="stat"><div class="stat-val">HD</div><div class="stat-lbl">Max Quality</div></div>
+    <div class="stat"><div class="stat-val">0</div><div class="stat-lbl">Watermarks</div></div>
+  </div>
+</div>
+
+
+<section class="section" id="platforms">
+  <div class="wrap">
+    <h2 class="section-title">Supported <span class="grad">Platforms</span></h2>
+    <p class="section-sub">এই সব platform থেকে watermark-free ভিডিও ডাউনলোড করুন</p>
+    <div class="platforms">
+      <div class="platform-card">
+        <div class="p-icon" style="background:#010101;">
+          <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>
+        </div>
+        <div class="p-name">TikTok</div>
+        <div class="p-tag">Watermark Free ✓</div>
+      </div>
+      <div class="platform-card">
+        <div class="p-icon" style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </div>
+        <div class="p-name">Instagram</div>
+        <div class="p-tag">Reels & Videos ✓</div>
+      </div>
+      <div class="platform-card">
+        <div class="p-icon" style="background:#1877f2;">
+          <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </div>
+        <div class="p-name">Facebook</div>
+        <div class="p-tag">HD Videos ✓</div>
+      </div>
+      <div class="platform-card">
+        <div class="p-icon" style="background:#ff0000;">
+          <svg viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+        </div>
+        <div class="p-name">YouTube</div>
+        <div class="p-tag">All Qualities ✓</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="how">
+  <div class="wrap">
+    <h2 class="section-title">কিভাবে <span class="grad">কাজ করে?</span></h2>
+    <p class="section-sub">মাত্র ৩টি সহজ ধাপে ভিডিও ডাউনলোড করুন</p>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <div class="step-title">URL Copy করুন</div>
+        <div class="step-desc">TikTok, Instagram বা Facebook থেকে video এর link copy করুন।</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon" style="background:linear-gradient(135deg,#db2777,#f43f5e);">
+          <svg viewBox="0 0 24 24" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div class="step-title">Paste ও Click করুন</div>
+        <div class="step-desc">Input box এ URL paste করুন এবং Download বাটনে click করুন।</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon" style="background:linear-gradient(135deg,#2563eb,#06b6d4);">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="step-title">Download করুন</div>
+        <div class="step-desc">পছন্দের quality বেছে নিন এবং HD ভিডিও download করুন।</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="wrap">
+    <div class="features-card">
+      <h2 class="section-title" style="margin-bottom:8px;">কেন <span class="grad">VidSnap Pro?</span></h2>
+      <div class="features-grid">
+        <div class="feature-item"><div class="feature-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="feature-text">100% Watermark Free ভিডিও</span></div>
+        <div class="feature-item"><div class="feature-icon"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span class="feature-text">Lightning Fast Download</span></div>
+        <div class="feature-item"><div class="feature-icon"><svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><span class="feature-text">HD 1080p Quality Support</span></div>
+        <div class="feature-item"><div class="feature-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="feature-text">কোনো Registration নেই</span></div>
+        <div class="feature-item"><div class="feature-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><span class="feature-text">Unlimited Downloads</span></div>
+        <div class="feature-item"><div class="feature-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><span class="feature-text">100% Safe & Secure</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="wrap">
+  <div class="ad-banner" style="margin-bottom:20px;">
+    <div style="font-size:10px;letter-spacing:2px;margin-bottom:4px;">Advertisement</div>
+    <div class="ad-inner">[Ad Space — 300×250 Rectangle]</div>
+  </div>
+</div>
+
+
+<section class="section" id="faq">
+  <div class="wrap">
+    <h2 class="section-title">সাধারণ <span class="grad">প্রশ্নোত্তর</span></h2>
+    <p class="section-sub" style="margin-bottom:28px;">কোনো প্রশ্ন থাকলে দেখুন</p>
+    <div class="faq-wrap">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">কোন কোন Platform সাপোর্ট করে?<svg viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-a">TikTok, Instagram, Facebook, YouTube সহ অনেক জনপ্রিয় social media platform সাপোর্ট করে।</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Watermark থাকবে?<svg viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-a">না! VidSnap Pro সম্পূর্ণ watermark-free ভিডিও ডাউনলোড করে দেয়। আপনি pure HD quality পাবেন।</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">কি HD quality পাওয়া যাবে?<svg viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-a">হ্যাঁ! 1080p HD, 720p HD, 480p SD এবং Audio MP3 — সব format এ ডাউনলোড করা যাবে।</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">কোনো App install করতে হবে?<svg viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-a">না! VidSnap Pro একটি web-based tool। কোনো app বা software install করতে হবে না।</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">এটা কি free?<svg viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-a">হ্যাঁ, VidSnap Pro সম্পূর্ণ বিনামূল্যে ব্যবহার করা যায়!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<
+<div class="wrap">
+  <div class="ad-banner" style="margin-bottom:24px;">
+    <div style="font-size:10px;letter-spacing:2px;margin-bottom:4px;">Advertisement</div>
+    <div class="ad-inner">[Ad Space — 728×90 Bottom Banner]</div>
+  </div>
+</div>
+
+
+<footer>
+  <div class="wrap">
+    <div class="footer-logo">
+      <div class="logo-icon" style="width:34px;height:34px;border-radius:10px;">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="logo-text" style="font-size:18px;">VidSnap Pro</span>
+    </div>
+    <p class="footer-desc">The best free social media video downloader — HD quality, no watermarks.</p>
+    <p class="footer-copy">© 2025 VidSnap Pro. For personal use only. Respect copyright laws.</p>
+  </div>
+</footer>
+
+<script>
+  let currentUrl = '';
+
+  async function fetchInfo() {
+    const url = document.getElementById('videoUrl').value.trim();
+    if (!url) { showError('URL টি paste করুন'); return; }
+
+    currentUrl = url;
+    hideError();
+    hideResult();
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      const data = await res.json();
+      if (!res.ok) { showError(data.error || 'Failed'); return; }
+      renderResult(data);
+    } catch {
+      showError('Network error. আবার চেষ্টা করুন।');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function renderResult(info) {
+    const tagClass = {
+      TikTok:'tag-tiktok', Instagram:'tag-instagram',
+      Facebook:'tag-facebook', YouTube:'tag-youtube'
+    }[info.platform] || 'tag-tiktok';
+
+    const qualityBtns = info.formats.map(f => `
+      <button class="q-btn q-${f.quality==='HD 1080p'?'1080':f.quality==='HD 720p'?'720':f.quality==='SD 480p'?'480':'mp3'}"
+        onclick="startDownload('${f.quality}', this)">
+        <span class="q-btn-left">
+          ${f.format==='mp3'
+            ? '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>'
+            : '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+          }
+          ${f.quality}
+        </span>
+        <span class="q-size">${f.size || ''}</span>
+      </button>
+    `).join('');
+
+    const thumbHtml = info.thumbnail
+      ? `<div class="thumb-wrap"><img src="${info.thumbnail}" onerror="this.parentElement.style.display='none'" alt="thumb"></div>`
+      : '';
+
+    document.getElementById('resultCard').innerHTML = `
+      <span class="platform-tag ${tagClass}">${info.platform}</span>
+      <div class="result-inner">
+        ${thumbHtml}
+        <div class="result-info">
+          <div class="result-title">${escHtml(info.title)}</div>
+          ${info.author ? `<div class="result-author">${escHtml(info.author)}${info.duration ? ' &bull; ' + info.duration : ''}</div>` : ''}
+          <div class="quality-label">Quality বেছে নিন</div>
+          <div class="quality-grid">${qualityBtns}</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('resultSection').style.display = 'block';
+    document.getElementById('resultSection').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  async function startDownload(quality, btn) {
+    const allBtns = document.querySelectorAll('.q-btn');
+    allBtns.forEach(b => b.disabled = true);
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = '<div class="spinner"></div>';
+
+    try {
+      const downloadUrl = `/api/download?url=${encodeURIComponent(currentUrl)}&quality=${encodeURIComponent(quality)}`;
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.click();
+    } finally {
+      setTimeout(() => {
+        btn.innerHTML = origHTML;
+        allBtns.forEach(b => b.disabled = false);
+      }, 3000);
+    }
+  }
+
+  function toggleFaq(btn) {
+    const answer = btn.nextElementSibling;
+    const isOpen = answer.classList.contains('open');
+    document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+    document.querySelectorAll('.faq-q').forEach(q => q.classList.remove('open'));
+    if (!isOpen) { answer.classList.add('open'); btn.classList.add('open'); }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorBox');
+    el.textContent = '⚠️ ' + msg;
+    el.style.display = 'block';
+  }
+  function hideError() { document.getElementById('errorBox').style.display = 'none'; }
+  function hideResult() { document.getElementById('resultSection').style.display = 'none'; }
+  function setLoading(on) {
+    const btn = document.getElementById('fetchBtn');
+    btn.disabled = on;
+    btn.innerHTML = on
+      ? '<div class="spinner"></div>'
+      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download';
+  }
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
